@@ -1,0 +1,12 @@
+Google Calendar quick-add links (click to add):
+
+1. One-time Case 02:
+https://calendar.google.com/calendar/render?action=TEMPLATE&text=Add+Case+02+CTR+Opportunity+to+Portfolio&details=Next+real+piece:+Case+02+CTR+Engagement+Opportunity+Scoring+-+Low+CTR+at+High+Position%0AWhere:+case-studies/case-02-ctr-opportunity/+in+Task-1+repo%0ASteps:+Copy+_template+→+Run+notebook+→+Fill+3+beats+→+Update+README+→+git+push%0ARepo:+https://github.com/ahmed171102/Task-1&dates=20261013T170000Z/20261013T190000Z&ctz=Africa/Cairo
+
+2. Weekly recurring habit (create manually as recurring):
+Title: Portfolio habit — 30 min review, add one chart to next case
+When: Every Monday 7pm Africa/Cairo, until 2026-12-31
+Notification: 15 min before
+Description: Keeps portfolio from going stale — difference between class artifact and career platform. Claude Project preserved.
+
+Evidence: This file + reminder.ics importable + screenshot description

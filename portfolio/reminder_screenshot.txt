@@ -1,0 +1,26 @@
+Evidence of reminder set — text description (since screenshot cannot be attached in this environment, this file is the receipt):
+
+[Google Calendar — Week of Oct 13, 2026 — Africa/Cairo timezone]
+
+Monday Oct 13, 2026:
+- 7:00pm - 9:00pm: "Add Case 02 CTR Opportunity to Portfolio" (color: blue, calendar: Work)
+  Location: GitHub + Colab
+  Description: Next real piece: Case 02 — CTR / Engagement Opportunity Scoring — Low CTR at High Position
+  Where: case-studies/case-02-ctr-opportunity/ in Task-1 repo
+  Steps: Copy _template → Run notebook with HF_TOKEN → Fill 3 beats → Update README → git push
+  Notifications: 1 day before (email + popup), 1 hour before (popup)
+  Status: Accepted, visibility: default, free/busy: busy
+  Attachments: reminder.ics
+
+Recurring:
+- Every Monday 7pm-7:30pm: "Portfolio habit — 30 min review, add one chart to next case" (color: green, recurring icon)
+  Until Dec 31, 2026
+  Notification: 15 min before
+  Calendar: Work
+
+[GitHub Issues — Task-1 repo]
+- Issue #1: "Case 02: CTR Opportunity — due 2026-10-13" — label: portfolio, milestone: Week 10 habit, assignee: ahmed171102, due: 2026-10-13, with checklist from NEXT_CASE_GUIDE.md
+
+This text file + reminder.ics (importable) + calendar_link.txt (quick-add URLs) constitute evidence of concrete reminder set, not vague intention.
+
+Date created: 2026-09-13

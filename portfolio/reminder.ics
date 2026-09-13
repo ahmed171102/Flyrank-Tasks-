@@ -1,0 +1,41 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Ahmed//FlyRank Portfolio//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:portfolio-case02-20261013@ahmed171102.github.io
+DTSTAMP:20260913T150000Z
+DTSTART:20261013T170000Z
+DTEND:20261013T190000Z
+SUMMARY:Add Case 02 CTR Opportunity to Portfolio
+DESCRIPTION:Next real piece: Case 02 — CTR / Engagement Opportunity Scoring — Low CTR at High Position\nWhere: case-studies/case-02-ctr-opportunity/ in Task-1 repo\nSteps: 1) Copy _template 2) Run notebook with HF_TOKEN 3) Fill 3 beats (Problem / What I did / What came) 4) Update README + docs nav 5) git push → Pages deploys\nMetrics: Baseline vs RF, P@50 with base rate, top10 review with what would make it wrong\nRepo: https://github.com/ahmed171102/Task-1\nPaper template: docs/index.html (IEEE)\nClaude Project: FlyRank Portfolio — knows voice/stack/identity, no rebuild
+LOCATION:GitHub + Colab
+STATUS:CONFIRMED
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Case 02 CTR Opportunity due tomorrow — 2hr block
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT1H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Case 02 starts in 1 hour
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:portfolio-weekly-habit@ahmed171102.github.io
+DTSTAMP:20260913T150000Z
+DTSTART:20260913T170000Z
+DTEND:20260913T173000Z
+RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261231T235959Z
+SUMMARY:Portfolio habit — 30 min review, add one chart to next case
+DESCRIPTION:Recurring portfolio habit — every Monday 7pm Africa/Cairo\nCheck Task-1/case-studies/ progress, add one chart or one row to next case\nKeeps portfolio from going stale — difference between class artifact and career platform\nClaude Project preserved: FlyRank Portfolio knows voice/stack/identity
+STATUS:CONFIRMED
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:Portfolio habit in 15 min
+END:VALARM
+END:VEVENT
+END:VCALENDAR
