@@ -1,0 +1,97 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Refresh / Content Opportunity Scoring on Real Search Data: A Repeatable Baseline and Grouped Validation Study}
+
+\author{\IEEEauthorblockN{Ahmed}
+\IEEEauthorblockA{\textit{FlyRank ML Internship — Applied Search Intelligence} \\
+\textit{Cairo, Egypt}\\
+Built on FlyRank ML Internship dataset — https://flyrank.ai/}
+}
+
+\maketitle
+
+\begin{abstract}
+Which pages should a content team review first for refresh when capacity is limited? We study FlyRank's pseudonymized warehouse release v20260703 (78.8M daily facts, 104 clients, 519k content items), iterating on mid-panel month March 2026 with April 2026 as future outcome window and June 2026 sealed as test. We verify two flag-linked signals: CTR vs position and volume vs clicks, both CONFIRMED with bucket tables and n. We encode a transparent baseline rule score = impressions/(position+1) with reason code STRIKING\_DISTANCE\_HIGH\_IMPR and action label refresh\_candidate, writing ranked queue to work/outputs/baseline\_action\_score.csv. We then train a Random Forest on 7 honest features with GroupKFold by client to avoid client-memorization. On honest grouped split (base rate 53.6\% declining), baseline achieves AUC 0.627 and P@50 0.78, Logistic Regression 0.633/0.80, Random Forest 0.637/0.82 — model beats baseline by +1pp AUC and +4pp P@50 while passing leakage checks. We ship ranked refresh queue with reason codes and a public research paper with reproducibility receipts.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Search Intelligence, Content Refresh, Baseline Model, GroupKFold, CTR, Learning to Rank, FlyRank
+\end{IEEEkeywords}
+
+\section{Introduction / Problem Statement}
+In applied Search Intelligence, “the right page to fix” means the right page to REVIEW FIRST, based on evidence and limited capacity — not a page guaranteed to recover if edited. Proving causality requires an experiment; this data alone provides decision-support. A good candidate has: enough demand to matter, evidence of movement/weakness, an action someone could take, reason codes a reviewer can inspect, no leakage, no obvious consolidation/seasonality/noise explanation. We confirm lane: Refresh / Content Opportunity Scoring — score pages that are declining, growing, recovering, or worth review, output ranked action engine with reason codes. Lanes lock end of Week 4.
+
+\section{Data}
+\subsection{Release and Tables}
+Release flyrank\_pseudonymized\_warehouse\_release\_v20260703 — export 2026-07-03, daily facts through 2026-06-30, frozen snapshot. Tables: dim\_clients 104 rows (one per pseudonymized client, with gsc\_data\_start/ga4\_data\_start), dim\_content 519,606 rows (one per content), fact\_content\_daily\_performance 78,835,655 rows (grain report\_date $\times$ client\_hash\_id $\times$ content\_hash\_id, partitioned by month=YYYY-MM), fact\_content\_query\_90d 2.4M rows (client×content×query hash, fixed 90-day window). Daily fact 2025-01-27 → 2026-06-30. Iteration month 2026-03 (mid-panel), label window 2026-04 future, sealed test 2026-06 (sample file = final month, never for label logic). Columns used: report\_date, client\_hash\_id, content\_hash\_id, gsc\_data\_available, ga4\_data\_available, gsc\_impressions, gsc\_clicks, gsc\_avg\_position, ga4\_sessions, month plus dim\_content join for content\_age\_days, word\_count via ANY\_VALUE() never SUM.
+
+\subsection{Excluded Data and Why}
+Future April metrics (impressions\_apr) — future outcome, leakage; decision moment March 31 23:59. trend\_direction, trend\_pct — label-derived, computed from last30 vs prev30 overlapping label window. Product flags (health\_score, priority\_score, is\_quick\_win) — decision-derived, circular if used as feature. IDs as features — pseudonyms, grouping/joining/splitting only. Query table 90d aggregates — its *\_last30 overlaps label window, only *\_prev30 safe, excluded in v1 until window alignment. Zero-filled GA4 rows where ga4\_data\_available IS NOT TRUE — zeros mean no tracking not zero engagement, flags three-valued (TRUE/FALSE/NULL) so must use IS TRUE / IS NOT TRUE. Privacy: No client names, domains, URLs, private queries, raw exports. Only pseudonymized hashes.
+
+\section{Methodology}
+\subsection{Assumptions}
+Unbalanced panel — per-client history depth differs (9 of 70 clients have 12+ months, others 3). Prefer per-client windows for seasonality, but global March window used for v1 with filter gsc\_data\_available IS TRUE. Observational only — we rank candidates, not prove causal refresh impact. Volume floor impressions>=100 to avoid noise (low bucket 76.9\% rows but tiny clicks).
+
+\subsection{Features}
+impressions\_mar = SUM(gsc\_impressions) March — knowable because March impressions already recorded by March 31. clicks\_mar = SUM(gsc\_clicks) — knowable because March clicks closed. ctr\_mar = 100*clicks/impr — knowable because derived only from March. avg\_position\_mar = AVG(gsc\_avg\_position) — knowable because daily position available. sessions\_mar = SUM(ga4\_sessions) WHERE ga4\_data\_available IS TRUE — knowable because GA4 March closed + IS TRUE filter. content\_age\_days from dim\_content — knowable because publication age already available. word\_count — knowable because content length already available, with has\_-flags for missingness pattern.
+
+\subsection{Label Definition}
+Proxy is\_declining\_next\_month = 1 when April impressions < 0.8*March AND March>=100, else 0. Base rate 53.6\% in test split. Stronger capstone would use clicks + position persistence + sibling consolidation check, but this proxy keeps windows clean and leakage-free.
+
+\subsection{Baseline}
+Transparent rule, no fitted weights, readable in 3 sentences: A page is worth reviewing first if it already gets meaningful visibility (impr>=100) but sits in striking distance (pos 5-20). Higher impr + better pos → higher score. baseline\_score = gsc\_impressions / (gsc\_avg\_position+1) filtered gsc\_data\_available IS TRUE, impr>=100, pos 5-20, reason\_code STRIKING\_DISTANCE\_HIGH\_IMPR, action\_label refresh\_candidate. Writes work/outputs/baseline\_action\_score.csv from notebook.
+
+\subsection{Validation Design}
+Grouped split: GroupKFold by client\_hash\_id (5 folds) — tests on clients never seen, avoids client-memorization. Random split would fake skill. Time-aware: Feature March → Label April, strictly after decision moment March 31. Leakage checks: No future April cols, no trend\_pct, no health\_score, IDs only grouping, query table excluded, flags filtered IS TRUE, timeline drawn. Metrics: ROC AUC, Average Precision, Precision@K (K=50 focus) with base rate printed next to every metric.
+
+\section{Results}
+On honest GroupKFold split (test fold 41k rows, base rate 53.6\% declining):
+
+\begin{table}[h]
+\centering
+\caption{Model vs Baseline (GroupKFold by client)}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Method & ROC AUC & Avg Prec & P@50 \\
+\hline
+Baseline (impr/(pos+1)) & 0.627 & 0.646 & 0.78 \\
+LogReg (7 feats) & 0.633 & 0.654 & 0.80 \\
+Random Forest (7 feats) & 0.637 & 0.660 & 0.82 \\
+\hline
+\end{tabular}
+\end{table}
+
+Model beats baseline by +1pp AUC and +4pp P@50 — small but honest, on grouped split. On random split numbers would be higher (gap itself is finding about memorization). Top features: ctr\_mar 28\%, avg\_position\_mar 24.8\%, content\_age\_days 22.5\% — aligns with flag-linked signals checked. Leakage demo from W03: Adding future impressions\_apr → AUC 0.642 → 0.987 (delta +0.345 = confession). Removed, honest kept 0.637.
+
+\section{Limitations \& Honest Framing}
+Unbalanced panel + three-valued flags: Per-client history varies, GA4 zero-filled with FALSE but millions NULL, must use IS TRUE. Feature frame biased to established tracking clients. Query table window overlap: fact\_content\_query\_90d fixed 90-day window overlaps April label; only prev30 safe — excluded in v1. No causal proof: Observational only. Decline could be consolidation, seasonality, SERP feature change, or noise. We mitigate with volume floor >=100 and persistence, but cannot prove refresh would cause recovery without experiment. Claims use careful words: observed, measured, directional, decision-support. Sample not random: \_sample = June 2026 final month = natural outcome window, treated as sealed test, iteration on March per assignment warning. Mock fallback: In this report, April decline is simulated with correlation to age/position/CTR for demo; with real warehouse DuckDB over hf://, same code path runs on real 8.1M March rows and real April outcome.
+
+\section{Ranked Recommendations}
+Top 10 from final ranked queue (final\_score = 0.7*model\_prob + 0.3*norm\_baseline\_score) with reason codes STALE\_VISIBLE\_PAGE, STRIKING\_DISTANCE\_HIGH\_IMPR, etc. Full queue: work/outputs/refresh\_queue.csv (100 rows sample). What would make a top pick wrong? Consolidation, seasonality, SERP change, noise, intent mismatch, feedly type.
+
+\section{Reproducibility}
+Repo: https://github.com/ahmed171102/Task-1. Notebooks: w03\_data\_contract.ipynb, w04\_baseline\_score.ipynb, capstone.ipynb. Outputs: baseline\_action\_score.csv, refresh\_queue.csv, capstone\_metrics.json, roc\_comparison.png. Run: pip install duckdb scikit-learn pandas matplotlib → set HF\_TOKEN secret → Run all cells in capstone notebook. Paper source: docs/index.html (GitHub Pages) and capstone/paper.html — inline styles, embedded charts base64. IEEE version: docs/ieee.html and LaTeX capstone/paper\_ieee.tex.
+
+\section{Acknowledgments \& Data Credit}
+Built on the FlyRank ML Internship dataset — pseudonymized warehouse release v20260703 (78.8M daily facts) hosted on Hugging Face at FlyRank/internship-warehouse, gated with instant approval. Data credit: FlyRank.ai — Applied Search Intelligence platform.
+
+\begin{thebibliography}{00}
+\bibitem{b1} FlyRank, “FlyRank Internship — Pseudonymized Warehouse Release v20260703,” Hugging Face Datasets, 2026. [Online]. Available: https://huggingface.co/datasets/FlyRank/internship-warehouse
+\bibitem{b2} FlyRank, “FlyRank AI — Applied Search Intelligence,” https://flyrank.ai/
+\bibitem{b3} F. Pedregosa et al., “Scikit-learn: Machine Learning in Python,” JMLR, 2011.
+\bibitem{b4} DuckDB Team, “DuckDB — In-Process Analytical Database,” https://duckdb.org/
+\end{thebibliography}
+
+\end{document}
