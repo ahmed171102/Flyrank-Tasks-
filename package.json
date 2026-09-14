@@ -1,0 +1,19 @@
+{
+  "name": "flyrank-task-api",
+  "version": "1.0.0",
+  "description": "Simple in-memory to-do CRUD API built with Node.js + Express. FlyRank Internship · Backend Track · Week 2 · Assignment A1.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": ["express", "crud", "swagger"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

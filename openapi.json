@@ -1,0 +1,153 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Task API",
+      "version": "1.0.0",
+      "description": "Simple in-memory to-do CRUD API"
+    },
+    "paths": {
+      "/": {
+        "get": {
+          "summary": "API info",
+          "responses": {
+            "200": {
+              "description": "API name, version, endpoints"
+            }
+          }
+        }
+      },
+      "/health": {
+        "get": {
+          "summary": "Health check",
+          "responses": {
+            "200": {
+              "description": "Server is alive"
+            }
+          }
+        }
+      },
+      "/tasks": {
+        "get": {
+          "summary": "List all tasks",
+          "responses": {
+            "200": {
+              "description": "Array of tasks"
+            }
+          }
+        },
+        "post": {
+          "summary": "Create a task",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["title"],
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "example": "Buy milk"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Created"
+            },
+            "400": {
+              "description": "Validation error"
+            }
+          }
+        }
+      },
+      "/tasks/{id}": {
+        "get": {
+          "summary": "Get one task",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "A task"
+            },
+            "404": {
+              "description": "Not found"
+            }
+          }
+        },
+        "put": {
+          "summary": "Update a task",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "done": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Updated"
+            },
+            "400": {
+              "description": "Validation error"
+            },
+            "404": {
+              "description": "Not found"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Delete a task",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Deleted"
+            },
+            "404": {
+              "description": "Not found"
+            }
+          }
+        }
+      }
+    }
+  }
